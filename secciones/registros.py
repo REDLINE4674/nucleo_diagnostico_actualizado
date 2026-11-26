@@ -79,7 +79,8 @@ def mostrar_datos(conexion, tabla_visual, nombre_tabla):
 
 def mostrar_pagina_registros(
     panel, ventana, conexion, nombre, es_administrador, es_empleado,
-    es_doctor, id_doctor_logueado, nombre_doctor_logueado
+    es_doctor, id_doctor_logueado, nombre_doctor_logueado,
+    id_paciente_seleccionado=None
 ):
     encabezado_tabla, contador_registros = crear_encabezado_seccion(
         panel,
@@ -117,6 +118,23 @@ def mostrar_pagina_registros(
         for reg in registros:
             tabla_visual.insert("", "end", values=reg)
 
+    def resaltar_paciente(tabla_visual):
+        if id_paciente_seleccionado is None or not es_tabla_pacientes(nombre):
+            return
+        columnas = [str(columna).strip().lower() for columna in tabla_visual["columns"]]
+        indice_id = next(
+            (i for i, columna in enumerate(columnas)
+             if columna in ("id_paciente", "id paciente", "id")),
+            0
+        )
+        for item in tabla_visual.get_children():
+            valores = tabla_visual.item(item, "values")
+            if indice_id < len(valores) and str(valores[indice_id]) == str(id_paciente_seleccionado):
+                tabla_visual.selection_set(item)
+                tabla_visual.focus(item)
+                tabla_visual.see(item)
+                break
+
     def actualizar(mostrar_si_oculto=True):
         nombre_actual = nombre
         if nombre_actual is None:
@@ -139,6 +157,7 @@ def mostrar_pagina_registros(
                     id_doctor_logueado
                 )
                 poblar_treeview(tabla_visual, columnas, registros)
+                resaltar_paciente(tabla_visual)
                 contador_registros.config(
                     text=f"Registros encontrados: {len(registros)}"
                 )
@@ -161,6 +180,7 @@ def mostrar_pagina_registros(
                 tabla_visual,
                 nombre_actual
             )
+            resaltar_paciente(tabla_visual)
             contador_registros.config(
                 text=f"Registros encontrados: {cantidad}"
             )
@@ -196,3 +216,6 @@ def mostrar_pagina_registros(
     ):
         if not es_tabla_citas(nombre):
             crear_boton(botones, text=texto_boton_insertar(nombre), command=lambda: abrir_ventana_insertar(ventana, conexion, nombre, lambda: actualizar(mostrar_si_oculto=False)), estilo="principal", width=20).pack(side="right")
+
+    if id_paciente_seleccionado is not None:
+        actualizar()

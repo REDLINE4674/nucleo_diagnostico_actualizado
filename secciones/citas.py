@@ -705,7 +705,9 @@ def mostrar_consulta_citas(
     contenedor,
     conexion,
     contador=None,
-    id_doctor=None
+    id_doctor=None,
+    al_ver_paciente=None,
+    boton_ver_paciente=None
 ):
     for widget in contenedor.winfo_children():
         widget.destroy()
@@ -740,11 +742,44 @@ def mostrar_consulta_citas(
         id_doctor=id_doctor
     )
 
+    if al_ver_paciente is not None:
+        if boton_ver_paciente is not None:
+            boton_ver_paciente.configure(state="disabled")
+
+        def cambiar_seleccion(event=None):
+            if boton_ver_paciente is not None:
+                boton_ver_paciente.configure(
+                    state="normal" if tabla.selection() else "disabled"
+                )
+
+        def ver_paciente_seleccionado():
+            seleccion = tabla.selection()
+            if not seleccion:
+                return
+            valores = tabla.item(seleccion[0], "values")
+            try:
+                id_cita = int(valores[0])
+                cita = obtener_cita(conexion, id_cita)
+                if not cita:
+                    raise ValueError("La cita seleccionada ya no está disponible.")
+                al_ver_paciente(cita[0])
+            except Exception as error:
+                messagebox.showerror(
+                    "No se pudo abrir el paciente",
+                    "No fue posible identificar al paciente de esta cita.\n\n"
+                    + str(error),
+                    parent=contenedor.winfo_toplevel()
+                )
+
+        if boton_ver_paciente is not None:
+            boton_ver_paciente.configure(command=ver_paciente_seleccionado)
+        tabla.bind("<<TreeviewSelect>>", cambiar_seleccion)
+
 
 
 def mostrar_pagina_citas(
     panel, ventana, conexion, es_doctor, es_empleado,
-    es_administrador, id_doctor_logueado
+    es_administrador, id_doctor_logueado, al_ver_paciente=None
 ):
     subtitulo_citas = (
         "Consulta tus citas m\u00e9dicas agendadas."
@@ -761,6 +796,8 @@ def mostrar_pagina_citas(
     botones_citas = crear_marco(panel, estilo="superficie")
     botones_citas.pack(fill="x", padx=20, pady=15)
 
+    boton_ver_paciente = None
+
     area_resultados_citas = crear_marco(panel, estilo="superficie")
     area_resultados_citas.pack(
         fill="both",
@@ -773,10 +810,34 @@ def mostrar_pagina_citas(
         id_doctor_logueado if id_doctor_logueado is not None else -1
     ) if es_doctor else None
 
-    crear_boton(botones_citas, text='Consultar citas', command=lambda: mostrar_consulta_citas(area_resultados_citas, conexion, contador_citas, id_doctor=filtro_doctor), estilo="accion", width=20).pack(side="left", padx=5)
+    crear_boton(
+        botones_citas,
+        text='Consultar citas',
+        command=lambda: mostrar_consulta_citas(
+            area_resultados_citas,
+            conexion,
+            contador_citas,
+            id_doctor=filtro_doctor,
+            al_ver_paciente=al_ver_paciente,
+            boton_ver_paciente=boton_ver_paciente
+        ),
+        estilo="accion",
+        width=16
+    ).pack(side="left", padx=3)
+
+    if al_ver_paciente is not None:
+        boton_ver_paciente = crear_boton(
+            botones_citas,
+            text='Ver información',
+            command=lambda: None,
+            estilo="principal",
+            width=17,
+            state="disabled"
+        )
+        boton_ver_paciente.pack(side="left", padx=3)
 
     # Solo Empleado o Administrador pueden generar o modificar citas
     if es_empleado or es_administrador:
-        crear_boton(botones_citas, text='Generar cita', command=lambda: abrir_formulario_cita(ventana, conexion), estilo="principal", width=20).pack(side="right", padx=5)
+        crear_boton(botones_citas, text='Actualizar cita', command=lambda: abrir_consulta_citas(ventana, conexion, permitir_actualizacion=True), estilo="principal", width=17).pack(side="left", padx=3)
 
-        crear_boton(botones_citas, text='Actualizar cita', command=lambda: abrir_consulta_citas(ventana, conexion, permitir_actualizacion=True), estilo="principal", width=20).pack(side="right", padx=5)
+        crear_boton(botones_citas, text='Generar cita', command=lambda: abrir_formulario_cita(ventana, conexion), estilo="principal", width=14).pack(side="left", padx=3)

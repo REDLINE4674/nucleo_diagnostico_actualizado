@@ -21,6 +21,55 @@ COLORES = {
 }
 
 
+_TEMAS_SECCION = {
+    "inicio": {
+        "fondo": "#F0F2F5",
+        "superficie": "#FFFFFF",
+        "tarjeta": "#FFFFFF",
+    },
+    "citas": {
+        "fondo": "#EDF4FA",
+        "superficie": "#F5F9FD",
+        "tarjeta": "#FAFCFF",
+    },
+    "pacientes": {
+        "fondo": "#EFF5EF",
+        "superficie": "#F6FAF6",
+        "tarjeta": "#FBFDFB",
+    },
+    "diagnosticos": {
+        "fondo": "#F8F0F3",
+        "superficie": "#FCF7F9",
+        "tarjeta": "#FFFCFD",
+    },
+    "catalogos": {
+        "fondo": "#F5F2EB",
+        "superficie": "#FAF8F3",
+        "tarjeta": "#FDFCF9",
+    },
+}
+
+
+def establecer_tema_seccion(widget, seccion):
+    """Asigna el tema visual que heredaran los widgets de una seccion."""
+    if seccion not in _TEMAS_SECCION:
+        raise ValueError(f"Tema de seccion desconocido: {seccion}")
+    widget._tema_seccion = seccion
+    estilo = getattr(widget, "_tema_estilo", None)
+    if estilo in ("fondo", "superficie", "tarjeta"):
+        widget.configure(bg=_TEMAS_SECCION[seccion][estilo])
+
+
+def _tema_de(widget):
+    actual = widget
+    while actual is not None:
+        seccion = getattr(actual, "_tema_seccion", None)
+        if seccion in _TEMAS_SECCION:
+            return seccion
+        actual = getattr(actual, "master", None)
+    return "inicio"
+
+
 FUENTES = {
     "compacta": ("Arial", 9),
     "compacta_negrita": ("Arial", 9, "bold"),
@@ -96,6 +145,8 @@ _ESTILOS_ETIQUETA = {
 def crear_etiqueta(parent, *, estilo="texto", **opciones):
     """Crea una etiqueta con colores y tipografia compartidos."""
     configuracion = _ESTILOS_ETIQUETA[estilo].copy()
+    if estilo not in ("encabezado", "sobre_azul"):
+        configuracion["bg"] = _TEMAS_SECCION[_tema_de(parent)]["superficie"]
     configuracion.update(opciones)
     return tk.Label(parent, **configuracion)
 
@@ -121,9 +172,15 @@ _ESTILOS_MARCO = {
 
 def crear_marco(parent, *, estilo="superficie", **opciones):
     """Crea un marco con uno de los fondos y bordes compartidos."""
+    seccion = _tema_de(parent)
     configuracion = _ESTILOS_MARCO[estilo].copy()
+    if estilo in ("fondo", "superficie", "tarjeta"):
+        configuracion["bg"] = _TEMAS_SECCION[seccion][estilo]
     configuracion.update(opciones)
-    return tk.Frame(parent, **configuracion)
+    marco = tk.Frame(parent, **configuracion)
+    marco._tema_estilo = estilo
+    establecer_tema_seccion(marco, seccion)
+    return marco
 
 
 def crear_entrada(parent, **opciones):

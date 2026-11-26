@@ -12,7 +12,7 @@ from secciones.registros import (
     mostrar_pagina_registros
 )
 from utilidades.roles import obtener_nombre_perfil
-from utilidades.diseno import COLORES, FUENTES, crear_boton, crear_etiqueta, crear_marco
+from utilidades.diseno import COLORES, FUENTES, crear_boton, crear_etiqueta, crear_marco, establecer_tema_seccion
 
 
 def mostrar_menu(ventana, conexion, usuario, rol, al_cerrar_sesion):
@@ -131,6 +131,10 @@ def mostrar_menu(ventana, conexion, usuario, rol, al_cerrar_sesion):
         pady=12
     )
 
+    def establecer_tema_vista(seccion):
+        establecer_tema_seccion(ventana, seccion)
+        establecer_tema_seccion(panel, seccion)
+
     def limpiar_panel():
         for widget in panel.winfo_children():
             widget.destroy()
@@ -138,6 +142,7 @@ def mostrar_menu(ventana, conexion, usuario, rol, al_cerrar_sesion):
     # MENU PRINCIPAL
 
     def mostrar_inicio():
+        establecer_tema_vista("inicio")
         boton_regresar.pack_forget()
         limpiar_panel()
         mostrar_pagina_inicio(panel, usuario, perfil)
@@ -145,6 +150,7 @@ def mostrar_menu(ventana, conexion, usuario, rol, al_cerrar_sesion):
     boton_regresar = crear_boton(barra_superior, text='Regresar al menú', command=mostrar_inicio, estilo="secundario")
 
     def mostrar_seccion_citas():
+        establecer_tema_vista("citas")
         if not boton_regresar.winfo_manager():
             boton_regresar.pack(side="right", padx=(0, 10), pady=5)
         limpiar_panel()
@@ -155,12 +161,16 @@ def mostrar_menu(ventana, conexion, usuario, rol, al_cerrar_sesion):
             es_doctor,
             es_empleado,
             es_administrador,
-            id_doctor_logueado
+            id_doctor_logueado,
+            al_ver_paciente=lambda id_paciente: seleccionar_tabla(
+                "paciente",
+                id_paciente_seleccionado=id_paciente
+            )
         )
 
     # VISTA DE TABLAS
 
-    def seleccionar_tabla(nombre):
+    def seleccionar_tabla(nombre, id_paciente_seleccionado=None):
         if not tabla_permitida(nombre):
             messagebox.showwarning(
                 "Acceso restringido",
@@ -169,6 +179,12 @@ def mostrar_menu(ventana, conexion, usuario, rol, al_cerrar_sesion):
             )
             return
 
+        tema = (
+            "diagnosticos" if es_tabla_consultas(nombre)
+            else "pacientes" if es_tabla_pacientes(nombre)
+            else "catalogos"
+        )
+        establecer_tema_vista(tema)
         if not boton_regresar.winfo_manager():
             boton_regresar.pack(side="right", padx=(0, 10), pady=5)
         limpiar_panel()
@@ -181,7 +197,8 @@ def mostrar_menu(ventana, conexion, usuario, rol, al_cerrar_sesion):
             es_empleado,
             es_doctor,
             id_doctor_logueado,
-            nombre_doctor_logueado
+            nombre_doctor_logueado,
+            id_paciente_seleccionado=id_paciente_seleccionado
         )
 
     # CARGAR TABLAS EN EL MENÚ LATERAL
