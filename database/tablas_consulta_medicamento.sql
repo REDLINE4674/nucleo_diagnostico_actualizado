@@ -13,7 +13,6 @@ CREATE TABLE IF NOT EXISTS medicamento (
 );
 
 -- 2. Tabla consulta
--- Nota: Relacionada con cita (id_cita) y medicamento (id_medicamento)
 CREATE TABLE IF NOT EXISTS consulta (
     id_consulta SERIAL PRIMARY KEY,
     id_cita INTEGER NOT NULL,

@@ -1,18 +1,15 @@
 # Núcleo de Diagnóstico
 
-Aplicación de escritorio para administrar pacientes, personal, usuarios, citas
-médicas, consultas clínicas y recetas. Está desarrollada en Python con Tkinter
-y utiliza PostgreSQL para almacenar la información.
+Aplicación de escritorio para administrar pacientes, personal, usuarios, citas,
+consultas clínicas y recetas. Está desarrollada en Python con Tkinter y utiliza
+PostgreSQL para almacenar la información.
 
 ## Funcionalidades
 
 - Inicio de sesión y menú con opciones según el rol.
-- Consulta de tablas de la base de datos y formularios de captura generados a
-  partir de sus columnas.
-- Registro de citas, consulta de disponibilidad por médico y fecha, y
-  actualización de citas existentes.
-- Validación para evitar citas duplicadas del mismo paciente en la misma fecha
-  y hora.
+- Consulta de tablas y formularios de captura generados desde sus columnas.
+- Registro, consulta y actualización de citas, con validación de disponibilidad.
+- Validación para evitar citas duplicadas del mismo paciente en la misma fecha y hora.
 - Consulta del historial clínico y registro de diagnósticos y medicamentos.
 - Generación de recetas en PDF.
 - Asociación de cuentas de usuario con empleados o doctores mediante su ID.
@@ -21,24 +18,20 @@ y utiliza PostgreSQL para almacenar la información.
 
 | Rol | Acceso |
 | --- | --- |
-| Administrador (`1`) | Consulta las tablas y puede registrar datos. Puede generar y actualizar citas. |
-| Empleado (`2`) | Consulta pacientes, puede registrar pacientes y gestionar citas. |
-| Doctor (`3`) | Consulta sus citas, los pacientes relacionados con ellas y sus consultas; puede registrar consultas y recetas. |
+| Administrador (`1`) | Consulta tablas, registra datos y gestiona citas. |
+| Empleado (`2`) | Consulta y registra pacientes; gestiona citas. |
+| Doctor (`3`) | Consulta sus citas, pacientes e historial; registra consultas y recetas. |
 
-El acceso a pacientes y consultas de un doctor se filtra por el doctor asociado
-a su cuenta.
+El acceso de cada doctor a pacientes y consultas se filtra por el doctor asociado a
+su cuenta.
 
 ## Requisitos
 
-- Windows con Python instalado y Tkinter disponible.
+- Windows con Python y Tkinter.
 - PostgreSQL y una base de datos accesible desde la aplicación.
-- Paquetes de Python:
-  - `psycopg2-binary` para conectarse a PostgreSQL.
-  - `Pillow` para mostrar el logotipo opcional en la interfaz.
-  - `reportlab` para generar recetas en PDF.
+- Paquetes: `psycopg2-binary`, `Pillow` y `reportlab`.
 
-Este proyecto no incluye un archivo `requirements.txt` ni fija versiones de
-los paquetes.
+El proyecto no incluye `requirements.txt` ni fija versiones de los paquetes.
 
 ## Instalación y ejecución
 
@@ -56,56 +49,48 @@ python -m pip install --upgrade pip
 python -m pip install psycopg2-binary Pillow reportlab
 ```
 
-Configura primero PostgreSQL siguiendo la sección siguiente. Después ejecuta:
+Configura PostgreSQL y ejecuta la aplicación desde la carpeta del proyecto:
 
 ```powershell
 python main.py
 ```
 
 La ventana de inicio de sesión es el punto de entrada. Al cerrar sesión, la
-conexión actual se cierra y se muestra nuevamente el inicio de sesión.
+conexión se cierra y vuelve a mostrarse el inicio de sesión.
 
 ## Configuración de PostgreSQL
 
-La conexión se configura mediante constantes en `operaciones_sql/conexion.py`. Ajusta el host,
-el nombre de la base de datos, el puerto y las credenciales para tu instalación
-local. No publiques credenciales reales ni las guardes en el repositorio.
+Ajusta las constantes de conexión en `operaciones_sql/conexion.py`. Configura el
+host, el nombre de la base de datos, el puerto y las credenciales locales. No
+publiques credenciales reales ni las guardes en el repositorio.
 
-La aplicación espera que exista el esquema `public` y que estén creadas las
-tablas base:
-
-- `usuarios`
-- `empleado`
-- `doctor`
-- `paciente`
-- `cita`
-
-El programa consulta las tablas de la base de datos al construir el menú. Por
-eso, los nombres y columnas de las tablas deben corresponder al esquema que
-espera cada función.
+La aplicación espera el esquema `public` y las tablas base `usuarios`, `empleado`,
+`doctor`, `paciente` y `cita`. Sus nombres y columnas deben corresponder a los que
+consulta el programa.
 
 ### Scripts SQL incluidos
 
-Ejecuta los scripts desde un cliente PostgreSQL, conectado a la base de datos
-del proyecto:
+Ejecuta los scripts desde un cliente PostgreSQL conectado a la base de datos del
+proyecto:
 
-1. `database/ATUALIZACION DE USUARIOS.sql`: agrega las columnas `id_empleado` y
-   `id_doctor` si faltan, establece sus claves foráneas y evita que una cuenta
-   esté vinculada simultáneamente a un empleado y a un doctor. Requiere que las
-   tablas `usuarios`, `empleado` y `doctor` ya existan.
-2. `database/tablas_consulta_medicamento.sql`: crea `medicamento` y `consulta`. Debe
-   ejecutarse después de crear `cita`, pues `consulta` referencia
-   `cita(id_cita)`.
+1. `database/TABLA CITAS.sql`: crea `cita` y sus relaciones con `"Paciente"(codigo)`
+   y `"Doctor"(id)`. Estas tablas deben existir antes de ejecutar el script.
+   También agrega restricciones para evitar citas duplicadas del mismo paciente o
+   doctor en la misma fecha y hora.
+2. `database/tablas_consulta_medicamento.sql`: crea `medicamento` y `consulta`.
+   Ejecuta este script después de crear `cita`, porque `consulta` la referencia.
+3. `database/ATUALIZACION DE USUARIOS.sql`: agrega `id_empleado` e `id_doctor`,
+   establece sus claves foráneas y evita que una cuenta se vincule a ambos tipos de
+   personal. Requiere que existan `usuarios`, `empleado` y `doctor`.
 
-Los scripts usan `IF NOT EXISTS` o verificaciones de restricciones, por lo que
-PostgreSQL puede informar que una columna ya existe y omitirla. Ese aviso es
-normal cuando la actualización ya se aplicó.
+Los scripts comprueban si algunos objetos ya existen. Los avisos de objetos
+existentes son normales si la actualización ya se aplicó.
 
 ### Tablas principales
 
 | Tabla | Uso |
 | --- | --- |
-| `usuarios` | Inicio de sesión, rol y vínculo opcional con empleado o doctor. Roles: administrador `1`, empleado `2`, doctor `3`. |
+| `usuarios` | Inicio de sesión, rol y vínculo opcional con empleado o doctor. |
 | `empleado` | Datos del personal y turno. |
 | `doctor` | Datos del doctor y especialidad. |
 | `paciente` | Datos de los pacientes. |
@@ -115,48 +100,76 @@ normal cuando la actualización ya se aplicó.
 
 ## Estructura del proyecto
 
-Las vistas del panel principal viven en `secciones/`. `interfaz/menu.py` se
-encarga de la navegacion y conecta cada opcion con su vista.
+Las vistas de las páginas están en `secciones/`. `interfaz/menu.py` administra la
+navegación y los permisos, y conecta cada opción con su vista.
 
 ```text
 main.py                       Punto de entrada
-interfaz/                     Marco principal y navegacion
-  menu.py                     Navegacion y control de permisos
-secciones/                    Vistas y flujos de cada pagina
-  login.py                    Inicio de sesion
-  inicio.py                   Pagina principal
-  citas.py                    Pagina y formularios de citas
-  registros.py                Vistas de tablas y consultas por rol
-  diagnosticos.py             Consulta clinica e historial
+interfaz/                     Marco principal y navegación
+  menu.py                     Navegación y control de permisos
+secciones/                    Vistas y flujos de cada página
+  login.py                    Inicio de sesión
+  inicio.py                   Página principal
+  citas.py                    Página y formularios de citas
+  registros.py                Tablas y consultas por rol
+  diagnosticos.py             Consulta clínica e historial
   formulario_registro.py      Formulario de alta de registros
-operaciones_sql/              Acceso a PostgreSQL y operaciones de datos
-  conexion.py                 Configuracion y conexion
+operaciones_sql/              Conexión y operaciones con PostgreSQL
+  conexion.py                 Configuración y conexión
   consultas.py                Consultas generales y metadatos
-  citas.py                    Operaciones de citas y medicos
+  citas.py                    Operaciones de citas y médicos
   consultas_medicas.py        Historial, pacientes y medicamentos
-  insertar.py                 Insercion de registros
+  insertar.py                 Inserción de registros
 utilidades/                   Funciones compartidas
-  diseno.py                   Colores, fuentes, campos y tablas con scroll
+  diseno.py                   Diseño y constructores reutilizables de Tkinter
   roles.py                    Etiquetas de perfil
-  recetas.py                  Generacion de recetas PDF
-database/                     Scripts SQL de actualizacion y creacion
+  recetas.py                  Generación de recetas PDF
+database/                     Scripts SQL de actualización y creación
+  TABLA CITAS.sql             Creación de citas y restricciones de duplicados
+  ATUALIZACION DE USUARIOS.sql Vínculos de cuentas con empleados y doctores
+  tablas_consulta_medicamento.sql Tablas de medicamentos y consultas
 ```
+
+## Sistema de diseño
+
+`utilidades/diseno.py` centraliza los colores (`COLORES`), las tipografías
+(`FUENTES`) y los estilos comunes de la interfaz. También ofrece constructores
+para botones, etiquetas, marcos, entradas, selectores, encabezados de sección y
+tablas con barras de desplazamiento.
+
+Usa los constructores en las vistas para mantener los estilos compartidos. El
+parámetro `estilo` permite elegir variantes, y las opciones adicionales permiten
+ajustes propios de cada control:
+
+```python
+from utilidades.diseno import crear_boton, crear_etiqueta
+
+crear_etiqueta(contenedor, text="Pacientes", estilo="titulo")
+crear_boton(
+    contenedor,
+    text="Guardar",
+    command=guardar,
+    estilo="principal"
+)
+```
+
+Para cambiar la apariencia general, modifica `COLORES`, `FUENTES` o los mapas de
+estilos en `utilidades/diseno.py`.
 
 ## Archivos opcionales
 
-La interfaz y el PDF intentan cargar `imagenes/nd.png` como logotipo. Si el
-archivo no está disponible, la interfaz muestra un encabezado de texto y la
-receta se genera sin logotipo.
+La interfaz y el PDF intentan cargar `imagenes/nd.png` como logotipo. Si el archivo
+no está disponible, se muestra un encabezado de texto y la receta se genera sin
+logotipo.
 
-Las recetas se guardan como `receta.pdf` en el directorio de trabajo desde el
-que se ejecutó la aplicación.
+Las recetas se guardan como `receta.pdf` en el directorio de trabajo desde el que
+se ejecutó la aplicación.
 
 ## Consideraciones
 
-- No se incluye un script completo para crear todas las tablas base; prepara
-  primero el esquema PostgreSQL requerido y luego aplica los scripts incluidos.
-- Actualmente las credenciales de conexión se configuran en `operaciones_sql/conexion.py`.
-- La autenticación compara la contraseña almacenada con el valor ingresado; el
-  proyecto no implementa hash de contraseñas. No se recomienda usarlo con
-  credenciales reales sin incorporar almacenamiento seguro de contraseñas.
-- No se incluye una suite de pruebas automatizadas.
+- No se incluye un script completo para crear todas las tablas base; prepara el
+  esquema PostgreSQL requerido y luego aplica los scripts incluidos.
+- La autenticación compara la contraseña almacenada con el valor ingresado. El
+  proyecto no implementa hash de contraseñas y no se recomienda usarlo con
+  credenciales reales sin incorporar almacenamiento seguro.
+- El proyecto no incluye una suite de pruebas automatizadas.
