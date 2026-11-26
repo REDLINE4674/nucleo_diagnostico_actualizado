@@ -1,28 +1,12 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-from conexion import obtener_columnas, insertar_registro
-
-
-def _obtener_personal(conexion, rol):
-    tablas_por_rol = {
-        "empleado": ("empleado", "id_empleado"),
-        "doctor": ("doctor", "id_doctor")
-    }
-    nombre_tabla, columna_id = tablas_por_rol[rol]
-    cursor = conexion.cursor()
-
-    try:
-        cursor.execute(
-            f"SELECT {columna_id}, nombre FROM {nombre_tabla} "
-            f"ORDER BY {columna_id} ASC"
-        )
-        return cursor.fetchall()
-    except Exception:
-        conexion.rollback()
-        raise
-    finally:
-        cursor.close()
+from operaciones_sql.consultas import (
+    obtener_columnas,
+    obtener_personal_por_rol
+)
+from operaciones_sql.insertar import insertar_registro
+from utilidades.diseno import COLORES, FUENTES, crear_boton, crear_etiqueta
 
 
 def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
@@ -59,7 +43,7 @@ def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
         nueva.geometry("450x600")
         nueva.resizable(False, False)
 
-        nueva.configure(bg="#F0F2F5")
+        nueva.configure(bg=COLORES["fondo"])
 
         nueva.transient(ventana)
         nueva.grab_set()
@@ -72,10 +56,10 @@ def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
         estilo.configure(
             "Formulario.TCombobox",
             padding=(0, 0),
-            font=("Arial", 10),
-            fieldbackground="white",
-            foreground="#333333",
-            background="white",
+            font=FUENTES["normal"],
+            fieldbackground=COLORES["blanco"],
+            foreground=COLORES["texto"],
+            background=COLORES["blanco"],
             bordercolor="#333333",
             lightcolor="#333333",
             darkcolor="#333333",
@@ -98,34 +82,22 @@ def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
 
         encabezado = tk.Frame(
             nueva,
-            bg="#1F4E79",
+            bg=COLORES["azul"],
             height=85
         )
 
         encabezado.pack(fill="x")
         encabezado.pack_propagate(False)
 
-        tk.Label(
-            encabezado,
-            text="Nuevo registro",
-            font=("Arial", 18, "bold"),
-            fg="white",
-            bg="#1F4E79"
-        ).pack(anchor="w", padx=20, pady=(15, 2))
+        crear_etiqueta(encabezado, text='Nuevo registro', estilo="encabezado", font=FUENTES['titulo']).pack(anchor="w", padx=20, pady=(15, 2))
 
-        tk.Label(
-            encabezado,
-            text=f"Tabla: {nombre_tabla.capitalize()}",
-            font=("Arial", 10),
-            fg="#DCE8F5",
-            bg="#1F4E79"
-        ).pack(anchor="w", padx=20)
+        crear_etiqueta(encabezado, text=f'Tabla: {nombre_tabla.capitalize()}', estilo="sobre_azul", font=FUENTES['normal']).pack(anchor="w", padx=20)
 
         # CONTENEDOR DEL FORMULARIO
 
         contenedor = tk.Frame(
             nueva,
-            bg="#F0F2F5"
+            bg=COLORES["fondo"]
         )
 
         contenedor.pack(
@@ -137,7 +109,7 @@ def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
 
         canvas = tk.Canvas(
             contenedor,
-            bg="white",
+            bg=COLORES["blanco"],
             highlightthickness=0
         )
 
@@ -149,7 +121,7 @@ def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
 
         formulario = tk.Frame(
             canvas,
-            bg="white"
+            bg=COLORES["blanco"]
         )
 
         ventana_formulario = canvas.create_window(
@@ -223,7 +195,7 @@ def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
 
             campo = tk.Frame(
                 formulario,
-                bg="white"
+                bg=COLORES["blanco"]
             )
 
             campo.pack(
@@ -235,18 +207,7 @@ def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
             campo.grid_columnconfigure(1, weight=1)
             campo.grid_rowconfigure(0, minsize=30)
 
-            tk.Label(
-                campo,
-                text=(
-                    "Id" if es_columna_id_usuario
-                    else nombre_columna.replace("_", " ").capitalize()
-                ),
-                font=("Arial", 10, "bold"),
-                bg="white",
-                fg="#333333",
-                anchor="w",
-                wraplength=130
-            ).grid(row=0, column=0, sticky="w", padx=(0, 12))
+            crear_etiqueta(campo, text='Id' if es_columna_id_usuario else nombre_columna.replace('_', ' ').capitalize(), estilo="texto", font=FUENTES['normal_negrita'], anchor='w', wraplength=130).grid(row=0, column=0, sticky="w", padx=(0, 12))
 
             if nombre_normalizado == "sexo":
 
@@ -254,7 +215,7 @@ def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
                     campo,
                     values=["F", "M"],
                     state="readonly",
-                    font=("Arial", 10),
+                    font=FUENTES["normal"],
                     style="Formulario.TCombobox"
                 )
                 entrada.set("")
@@ -265,7 +226,7 @@ def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
                     campo,
                     values=["M", "V"],
                     state="readonly",
-                    font=("Arial", 10),
+                    font=FUENTES["normal"],
                     style="Formulario.TCombobox"
                 )
                 entrada.set("")
@@ -276,7 +237,7 @@ def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
                     campo,
                     values=["admin", "empleado", "doctor"],
                     state="readonly",
-                    font=("Arial", 10),
+                    font=FUENTES["normal"],
                     style="Formulario.TCombobox"
                 )
                 entrada.set("empleado")
@@ -288,7 +249,7 @@ def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
                     campo,
                     values=[],
                     state="readonly",
-                    font=("Arial", 10),
+                    font=FUENTES["normal"],
                     style="Formulario.TCombobox"
                 )
                 entrada_id = entrada
@@ -297,7 +258,7 @@ def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
 
                 entrada = tk.Entry(
                     campo,
-                    font=("Arial", 10),
+                    font=FUENTES["normal"],
                     relief="solid",
                     borderwidth=1
                 )
@@ -312,7 +273,7 @@ def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
             entradas[nombre_columna] = entrada
 
         opciones_por_rol = {
-            rol: _obtener_personal(conexion, rol)
+            rol: obtener_personal_por_rol(conexion, rol)
             for rol in ("empleado", "doctor")
         } if es_tabla_usuarios else {}
         ids_por_opcion = {}
@@ -440,7 +401,7 @@ def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
 
         botones = tk.Frame(
             nueva,
-            bg="#F0F2F5"
+            bg=COLORES["fondo"]
         )
 
         botones.pack(
@@ -449,31 +410,9 @@ def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
             pady=(0, 15)
         )
 
-        tk.Button(
-            botones,
-            text="Cancelar",
-            command=cancelar,
-            width=15,
-            bg="#E0E4E8",
-            fg="#333333",
-            relief="flat",
-            font=("Arial", 10),
-            cursor="hand2"
-        ).pack(side="left")
+        crear_boton(botones, text='Cancelar', command=cancelar, estilo="neutro", width=15).pack(side="left")
 
-        tk.Button(
-            botones,
-            text="Guardar registro",
-            command=guardar,
-            width=18,
-            bg="#1F4E79",
-            fg="white",
-            activebackground="#163A5A",
-            activeforeground="white",
-            relief="flat",
-            font=("Arial", 10, "bold"),
-            cursor="hand2"
-        ).pack(side="right")
+        crear_boton(botones, text='Guardar registro', command=guardar, estilo="principal", width=18, activebackground=COLORES["azul_presionado"], activeforeground=COLORES["blanco"]).pack(side="right")
 
     except Exception as error:
 

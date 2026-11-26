@@ -1,3 +1,5 @@
+"""Consultas y operaciones SQL para citas."""
+
 from datetime import date, datetime
 
 

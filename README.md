@@ -67,7 +67,7 @@ conexión actual se cierra y se muestra nuevamente el inicio de sesión.
 
 ## Configuración de PostgreSQL
 
-La conexión se configura mediante constantes en `conexion.py`. Ajusta el host,
+La conexión se configura mediante constantes en `operaciones_sql/conexion.py`. Ajusta el host,
 el nombre de la base de datos, el puerto y las credenciales para tu instalación
 local. No publiques credenciales reales ni las guardes en el repositorio.
 
@@ -89,11 +89,11 @@ espera cada función.
 Ejecuta los scripts desde un cliente PostgreSQL, conectado a la base de datos
 del proyecto:
 
-1. `ATUALIZACION DE USUARIOS.sql`: agrega las columnas `id_empleado` y
+1. `database/ATUALIZACION DE USUARIOS.sql`: agrega las columnas `id_empleado` y
    `id_doctor` si faltan, establece sus claves foráneas y evita que una cuenta
    esté vinculada simultáneamente a un empleado y a un doctor. Requiere que las
    tablas `usuarios`, `empleado` y `doctor` ya existan.
-2. `tablas_consulta_medicamento.sql`: crea `medicamento` y `consulta`. Debe
+2. `database/tablas_consulta_medicamento.sql`: crea `medicamento` y `consulta`. Debe
    ejecutarse después de crear `cita`, pues `consulta` referencia
    `cita(id_cita)`.
 
@@ -115,19 +115,32 @@ normal cuando la actualización ya se aplicó.
 
 ## Estructura del proyecto
 
-| Archivo | Responsabilidad |
-| --- | --- |
-| `main.py` | Crea la ventana principal y coordina inicio/cierre de sesión. |
-| `login.py` | Interfaz de acceso y validación de credenciales. |
-| `menu.py` | Menú principal, navegación, permisos por rol y vistas de tablas. |
-| `conexion.py` | Conexión PostgreSQL, lectura de esquema, consulta e inserción de registros. |
-| `consultas.py` | Presenta los registros consultados en una tabla visual. |
-| `insertar.py` | Construye formularios de captura; para usuarios ofrece IDs según el rol. |
-| `consultas_citas.py` | Consultas y operaciones de base de datos relacionadas con citas y doctores. |
-| `citas.py` | Formularios de citas, calendario, consulta y actualización desde la interfaz. |
-| `consultas_medicas.py` | Historial clínico, diagnósticos, medicamentos y generación de recetas PDF. |
-| `ATUALIZACION DE USUARIOS.sql` | Actualiza los vínculos entre cuentas, empleados y doctores. |
-| `tablas_consulta_medicamento.sql` | Crea las tablas de medicamentos y consultas. |
+Las vistas del panel principal viven en `secciones/`. `interfaz/menu.py` se
+encarga de la navegacion y conecta cada opcion con su vista.
+
+```text
+main.py                       Punto de entrada
+interfaz/                     Marco principal y navegacion
+  menu.py                     Navegacion y control de permisos
+secciones/                    Vistas y flujos de cada pagina
+  login.py                    Inicio de sesion
+  inicio.py                   Pagina principal
+  citas.py                    Pagina y formularios de citas
+  registros.py                Vistas de tablas y consultas por rol
+  diagnosticos.py             Consulta clinica e historial
+  formulario_registro.py      Formulario de alta de registros
+operaciones_sql/              Acceso a PostgreSQL y operaciones de datos
+  conexion.py                 Configuracion y conexion
+  consultas.py                Consultas generales y metadatos
+  citas.py                    Operaciones de citas y medicos
+  consultas_medicas.py        Historial, pacientes y medicamentos
+  insertar.py                 Insercion de registros
+utilidades/                   Funciones compartidas
+  diseno.py                   Colores, fuentes y constructores de widgets
+  roles.py                    Etiquetas de perfil
+  recetas.py                  Generacion de recetas PDF
+database/                     Scripts SQL de actualizacion y creacion
+```
 
 ## Archivos opcionales
 
@@ -142,7 +155,7 @@ que se ejecutó la aplicación.
 
 - No se incluye un script completo para crear todas las tablas base; prepara
   primero el esquema PostgreSQL requerido y luego aplica los scripts incluidos.
-- Actualmente las credenciales de conexión se configuran en `conexion.py`.
+- Actualmente las credenciales de conexión se configuran en `operaciones_sql/conexion.py`.
 - La autenticación compara la contraseña almacenada con el valor ingresado; el
   proyecto no implementa hash de contraseñas. No se recomienda usarlo con
   credenciales reales sin incorporar almacenamiento seguro de contraseñas.

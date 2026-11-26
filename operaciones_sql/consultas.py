@@ -1,25 +1,6 @@
-import psycopg2
+"""Lectura de datos y metadatos de PostgreSQL."""
+
 from psycopg2 import sql
-
-
-# Datos de conexión
-HOST = "localhost"
-DATABASE = "NucleoDeDiagnostico"
-PORT = "5433"
-USUARIO = "admin"
-PASSWORD = "1234"
-
-
-# Conectar a PostgreSQL
-def conectar():
-    conexion = psycopg2.connect(
-        host=HOST,
-        database=DATABASE,
-        user=USUARIO,
-        password=PASSWORD,
-        port=PORT
-    )
-    return conexion
 
 
 def _obtener_columnas_clave_primaria(cursor, nombre_tabla):
@@ -38,7 +19,6 @@ def _obtener_columnas_clave_primaria(cursor, nombre_tabla):
     return [columna[0] for columna in cursor.fetchall()]
 
 
-# Obtener las tablas de la base de datos
 def obtener_tablas(conexion):
     cursor = conexion.cursor()
 
@@ -55,7 +35,6 @@ def obtener_tablas(conexion):
     return tablas
 
 
-# Consultar los registros de una tabla
 def consultar_registros(conexion, nombre_tabla):
     cursor = conexion.cursor()
 
@@ -92,7 +71,6 @@ def consultar_registros(conexion, nombre_tabla):
         cursor.close()
 
 
-# Obtener las columnas que se pueden insertar
 def obtener_columnas(conexion, nombre_tabla):
     cursor = conexion.cursor()
 
@@ -140,26 +118,22 @@ def consulta_usuarios(conexion, nombre, contrasena):
         cursor.close()
 
 
-# Insertar un registro
-def insertar_registro(conexion, nombre_tabla, nombres, valores):
+def obtener_personal_por_rol(conexion, rol):
+    tablas_por_rol = {
+        "empleado": ("empleado", "id_empleado"),
+        "doctor": ("doctor", "id_doctor")
+    }
+    nombre_tabla, columna_id = tablas_por_rol[rol]
     cursor = conexion.cursor()
 
-    if nombres:
-        consulta = sql.SQL("INSERT INTO {} ({}) VALUES ({})").format(
-            sql.Identifier(nombre_tabla),
-            sql.SQL(", ").join(
-                map(sql.Identifier, nombres)
-            ),
-            sql.SQL(", ").join(
-                sql.Placeholder() for valor in valores
-            )
+    try:
+        cursor.execute(
+            f"SELECT {columna_id}, nombre FROM {nombre_tabla} "
+            f"ORDER BY {columna_id} ASC"
         )
-        cursor.execute(consulta, valores)
-    else:
-        consulta = sql.SQL("INSERT INTO {} DEFAULT VALUES").format(
-            sql.Identifier(nombre_tabla)
-        )
-        cursor.execute(consulta)
-
-    conexion.commit()
-    cursor.close()
+        return cursor.fetchall()
+    except Exception:
+        conexion.rollback()
+        raise
+    finally:
+        cursor.close()

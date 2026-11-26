@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from datetime import date, datetime
 
-from consultas_citas import (
+from operaciones_sql.citas import (
     CitaDuplicadaError,
     obtener_pacientes,
     obtener_medicos,
@@ -13,6 +13,7 @@ from consultas_citas import (
     obtener_cita,
     actualizar_cita
 )
+from utilidades.diseno import COLORES, FUENTES, crear_boton, crear_etiqueta
 
 
 def abrir_formulario_cita(
@@ -26,7 +27,7 @@ def abrir_formulario_cita(
     nueva.title("Actualizar cita" if id_cita is not None else "Generar cita")
     nueva.geometry("900x500")
     nueva.minsize(750, 430)
-    nueva.configure(bg="#F0F2F5")
+    nueva.configure(bg=COLORES["fondo"])
 
     nueva.transient(ventana)
 
@@ -44,48 +45,22 @@ def abrir_formulario_cita(
 
     encabezado = tk.Frame(
         nueva,
-        bg="#1F4E79",
+        bg=COLORES["azul"],
         height=75
     )
 
     encabezado.pack(fill="x")
     encabezado.pack_propagate(False)
 
-    titulo_encabezado = tk.Label(
-        encabezado,
-        text="ACTUALIZAR CITA" if id_cita is not None else "GENERAR CITA",
-        font=("Arial", 19, "bold"),
-        bg="#1F4E79",
-        fg="white"
-    )
+    titulo_encabezado = crear_etiqueta(encabezado, text='ACTUALIZAR CITA' if id_cita is not None else 'GENERAR CITA', estilo="encabezado", font=FUENTES['titulo_19'])
     titulo_encabezado.pack(anchor="w", padx=25, pady=(15, 2))
 
-    tk.Label(
-        encabezado,
-        text=(
-            "Modifica el médico, la fecha o el horario."
-            if id_cita is not None
-            else "Programa una cita médica."
-        ),
-        font=("Arial", 10),
-        bg="#1F4E79",
-        fg="#DCE8F5"
-    ).pack(anchor="w", padx=25)
+    crear_etiqueta(encabezado, text='Modifica el médico, la fecha o el horario.' if id_cita is not None else 'Programa una cita médica.', estilo="sobre_azul", font=FUENTES['normal']).pack(anchor="w", padx=25)
 
     def regresar_menu():
         nueva.destroy()
 
-    tk.Button(
-        encabezado,
-        text="Regresar al menú",
-        command=regresar_menu,
-        bg="#E8EEF5",
-        fg="#1F4E79",
-        activebackground="#D0DFEF",
-        relief="flat",
-        font=("Arial", 9, "bold"),
-        cursor="hand2"
-    ).place(
+    crear_boton(encabezado, text='Regresar al menú', command=regresar_menu, estilo="secundario", activebackground=COLORES["azul_claro_presionado"], font=('Arial', 9, 'bold')).place(
         relx=0.98,
         rely=0.5,
         anchor="e"
@@ -95,7 +70,7 @@ def abrir_formulario_cita(
 
     principal = tk.Frame(
         nueva,
-        bg="#F0F2F5"
+        bg=COLORES["fondo"]
     )
 
     principal.pack(
@@ -109,7 +84,7 @@ def abrir_formulario_cita(
 
     formulario = tk.Frame(
         principal,
-        bg="white",
+        bg=COLORES["blanco"],
         relief="solid",
         borderwidth=1
     )
@@ -119,17 +94,11 @@ def abrir_formulario_cita(
         pady=(0, 12)
     )
 
-    tk.Label(
-        formulario,
-        text="Datos de la cita",
-        font=("Arial", 14, "bold"),
-        bg="white",
-        fg="#1F4E79"
-    ).pack(anchor="w", padx=20, pady=(15, 10))
+    crear_etiqueta(formulario, text='Datos de la cita', estilo="titulo", font=FUENTES['titulo_14']).pack(anchor="w", padx=20, pady=(15, 10))
 
     campos = tk.Frame(
         formulario,
-        bg="white"
+        bg=COLORES["blanco"]
     )
 
     campos.pack(
@@ -143,18 +112,12 @@ def abrir_formulario_cita(
 
     # Pacientes
 
-    tk.Label(
-        campos,
-        text="Paciente",
-        font=("Arial", 10, "bold"),
-        bg="white",
-        fg="#333333"
-    ).grid(row=0, column=0, sticky="w", padx=5, pady=5)
+    crear_etiqueta(campos, text='Paciente', estilo="texto", font=FUENTES['normal_negrita']).grid(row=0, column=0, sticky="w", padx=5, pady=5)
 
     combo_paciente = ttk.Combobox(
         campos,
         state="readonly",
-        font=("Arial", 10)
+        font=FUENTES["normal"]
     )
 
     combo_paciente.grid(
@@ -167,18 +130,12 @@ def abrir_formulario_cita(
 
     # Doctores
 
-    tk.Label(
-        campos,
-        text="Médico",
-        font=("Arial", 10, "bold"),
-        bg="white",
-        fg="#333333"
-    ).grid(row=0, column=1, sticky="w", padx=5, pady=5)
+    crear_etiqueta(campos, text='Médico', estilo="texto", font=FUENTES['normal_negrita']).grid(row=0, column=1, sticky="w", padx=5, pady=5)
 
     combo_medico = ttk.Combobox(
         campos,
         state="readonly",
-        font=("Arial", 10)
+        font=FUENTES["normal"]
     )
 
     combo_medico.grid(
@@ -191,15 +148,9 @@ def abrir_formulario_cita(
 
     # Fecha
 
-    tk.Label(
-        campos,
-        text="Fecha (AAAA-MM-DD)",
-        font=("Arial", 10, "bold"),
-        bg="white",
-        fg="#333333"
-    ).grid(row=2, column=0, sticky="w", padx=5, pady=5)
+    crear_etiqueta(campos, text='Fecha (AAAA-MM-DD)', estilo="texto", font=FUENTES['normal_negrita']).grid(row=2, column=0, sticky="w", padx=5, pady=5)
 
-    marco_fecha = tk.Frame(campos, bg="white")
+    marco_fecha = tk.Frame(campos, bg=COLORES["blanco"])
     marco_fecha.grid(
         row=3,
         column=0,
@@ -211,7 +162,7 @@ def abrir_formulario_cita(
 
     entrada_fecha = tk.Entry(
         marco_fecha,
-        font=("Arial", 10),
+        font=FUENTES["normal"],
         relief="solid",
         borderwidth=1
     )
@@ -221,18 +172,12 @@ def abrir_formulario_cita(
 
     # Horario
 
-    tk.Label(
-        campos,
-        text="Horario disponible",
-        font=("Arial", 10, "bold"),
-        bg="white",
-        fg="#333333"
-    ).grid(row=2, column=1, sticky="w", padx=5, pady=5)
+    crear_etiqueta(campos, text='Horario disponible', estilo="texto", font=FUENTES['normal_negrita']).grid(row=2, column=1, sticky="w", padx=5, pady=5)
 
     combo_horario = ttk.Combobox(
         campos,
         state="readonly",
-        font=("Arial", 10)
+        font=FUENTES["normal"]
     )
 
     combo_horario.grid(
@@ -283,7 +228,7 @@ def abrir_formulario_cita(
         titulo_mes = ttk.Label(
             encabezado_calendario,
             anchor="center",
-            font=("Arial", 11, "bold")
+            font=FUENTES["mediana_negrita"]
         )
 
         cuadrilla = ttk.Frame(ventana_calendario, padding=(10, 0, 10, 10))
@@ -353,16 +298,7 @@ def abrir_formulario_cita(
 
         dibujar_calendario()
 
-    tk.Button(
-        marco_fecha,
-        text="Calendario",
-        command=abrir_calendario,
-        bg="#E8EEF5",
-        fg="#1F4E79",
-        relief="flat",
-        font=("Arial", 9),
-        cursor="hand2"
-    ).grid(row=0, column=1, padx=(6, 0), ipady=3)
+    crear_boton(marco_fecha, text='Calendario', command=abrir_calendario, estilo="secundario", font=('Arial', 9)).grid(row=0, column=1, padx=(6, 0), ipady=3)
 
     def actualizar_horarios(mostrar_mensaje=True):
         combo_horario.set("")
@@ -431,16 +367,7 @@ def abrir_formulario_cita(
         lambda event: actualizar_horarios(False)
     )
 
-    boton_horarios = tk.Button(
-        campos,
-        text="Consultar horarios",
-        command=actualizar_horarios,
-        bg="#E8EEF5",
-        fg="#1F4E79",
-        relief="flat",
-        font=("Arial", 9, "bold"),
-        cursor="hand2"
-    )
+    boton_horarios = crear_boton(campos, text='Consultar horarios', command=actualizar_horarios, estilo="secundario", font=('Arial', 9, 'bold'))
 
     boton_horarios.grid(
         row=4,
@@ -468,7 +395,7 @@ def abrir_formulario_cita(
 
         boton_guardar.configure(
             text="Generar cita",
-            bg="#1F4E79"
+            bg=COLORES["azul"]
         )
 
     def guardar_cita():
@@ -574,7 +501,7 @@ def abrir_formulario_cita(
 
     botones_formulario = tk.Frame(
         formulario,
-        bg="white"
+        bg=COLORES["blanco"]
     )
 
     botones_formulario.pack(
@@ -583,33 +510,11 @@ def abrir_formulario_cita(
         pady=(0, 15)
     )
 
-    boton_guardar = tk.Button(
-        botones_formulario,
-        text="Generar cita",
-        command=guardar_cita,
-        width=18,
-        bg="#1F4E79",
-        fg="white",
-        activebackground="#163A5A",
-        activeforeground="white",
-        relief="flat",
-        font=("Arial", 10, "bold"),
-        cursor="hand2"
-    )
+    boton_guardar = crear_boton(botones_formulario, text='Generar cita', command=guardar_cita, estilo="principal", width=18, activebackground=COLORES["azul_presionado"], activeforeground=COLORES["blanco"])
 
     boton_guardar.pack(side="right", padx=5, ipady=5)
 
-    boton_limpiar = tk.Button(
-        botones_formulario,
-        text="Limpiar",
-        command=limpiar_formulario,
-        width=15,
-        bg="#E0E4E8",
-        fg="#333333",
-        relief="flat",
-        font=("Arial", 10),
-        cursor="hand2"
-    )
+    boton_limpiar = crear_boton(botones_formulario, text='Limpiar', command=limpiar_formulario, estilo="neutro", width=15)
     boton_limpiar.pack(side="right", padx=5, ipady=5)
 
     def cargar_cita_en_formulario(identificador):
@@ -752,19 +657,12 @@ def abrir_consulta_citas(
     consulta.title("Citas registradas")
     consulta.geometry("850x500")
     consulta.minsize(650, 350)
-    consulta.configure(bg="#F0F2F5")
+    consulta.configure(bg=COLORES["fondo"])
     consulta.transient(ventana)
 
-    tk.Label(
-        consulta,
-        text="CITAS REGISTRADAS",
-        font=("Arial", 16, "bold"),
-        bg="#1F4E79",
-        fg="white",
-        pady=18
-    ).pack(fill="x")
+    crear_etiqueta(consulta, text='CITAS REGISTRADAS', estilo="encabezado", font=FUENTES['titulo_16'], pady=18).pack(fill="x")
 
-    marco = tk.Frame(consulta, bg="white")
+    marco = tk.Frame(consulta, bg=COLORES["blanco"])
     marco.pack(fill="both", expand=True, padx=15, pady=15)
 
     columnas = ("id", "paciente", "medico", "fecha", "hora")
@@ -794,32 +692,13 @@ def abrir_consulta_citas(
             boton_actualizar.configure(state="disabled")
         _cargar_citas_en_tabla(tabla, conexion, consulta, id_doctor=id_doctor)
 
-    botones = tk.Frame(consulta, bg="#F0F2F5")
+    botones = tk.Frame(consulta, bg=COLORES["fondo"])
     botones.pack(pady=(0, 12))
 
-    tk.Button(
-        botones,
-        text="Actualizar lista",
-        command=cargar_citas,
-        bg="#1F4E79",
-        fg="white",
-        relief="flat",
-        font=("Arial", 10, "bold"),
-        cursor="hand2"
-    ).pack(side="left", padx=5)
+    crear_boton(botones, text='Actualizar lista', command=cargar_citas, estilo="principal").pack(side="left", padx=5)
 
     if permitir_actualizacion:
-        boton_actualizar = tk.Button(
-            botones,
-            text="Actualizar cita seleccionada",
-            command=lambda: actualizar_cita_seleccionada(),
-            state="disabled",
-            bg="#5A8FC4",
-            fg="white",
-            relief="flat",
-            font=("Arial", 10, "bold"),
-            cursor="hand2"
-        )
+        boton_actualizar = crear_boton(botones, text='Actualizar cita seleccionada', command=lambda: actualizar_cita_seleccionada(), estilo="accion", state='disabled')
         boton_actualizar.pack(side="left", padx=5)
 
         def cambiar_seleccion(event=None):
@@ -869,7 +748,7 @@ def mostrar_consulta_citas(
     for widget in contenedor.winfo_children():
         widget.destroy()
 
-    tabla_contenedor = tk.Frame(contenedor, bg="white")
+    tabla_contenedor = tk.Frame(contenedor, bg=COLORES["blanco"])
     tabla_contenedor.pack(fill="both", expand=True)
 
     columnas = ("id", "paciente", "medico", "fecha", "hora")
@@ -920,3 +799,50 @@ def mostrar_consulta_citas(
         contador,
         id_doctor=id_doctor
     )
+
+
+
+def mostrar_pagina_citas(
+    panel, ventana, conexion, es_doctor, es_empleado,
+    es_administrador, id_doctor_logueado
+):
+    encabezado_citas = tk.Frame(panel, bg=COLORES["blanco"])
+    encabezado_citas.pack(fill="x", padx=20, pady=15)
+
+    informacion_citas = tk.Frame(encabezado_citas, bg=COLORES["blanco"])
+    informacion_citas.pack(side="left")
+
+    crear_etiqueta(informacion_citas, text='Citas', estilo="titulo", font=FUENTES['titulo']).pack(anchor="w")
+
+    subtitulo_citas = (
+        "Consulta tus citas médicas agendadas."
+        if es_doctor
+        else "Genera, consulta y actualiza citas médicas."
+    )
+    crear_etiqueta(informacion_citas, text=subtitulo_citas, estilo="suave", font=FUENTES['normal']).pack(anchor="w", pady=(3, 0))
+
+    contador_citas = crear_etiqueta(encabezado_citas, text='Registros encontrados: 0', estilo="suave", font=FUENTES['normal_negrita'])
+    contador_citas.pack(side="right")
+
+    botones_citas = tk.Frame(panel, bg=COLORES["blanco"])
+    botones_citas.pack(fill="x", padx=20, pady=15)
+
+    area_resultados_citas = tk.Frame(panel, bg=COLORES["blanco"])
+    area_resultados_citas.pack(
+        fill="both",
+        expand=True,
+        padx=20,
+        pady=10
+    )
+
+    filtro_doctor = (
+        id_doctor_logueado if id_doctor_logueado is not None else -1
+    ) if es_doctor else None
+
+    crear_boton(botones_citas, text='Consultar citas', command=lambda: mostrar_consulta_citas(area_resultados_citas, conexion, contador_citas, id_doctor=filtro_doctor), estilo="accion", width=20).pack(side="left", padx=5)
+
+    # Solo Empleado o Administrador pueden generar o modificar citas
+    if es_empleado or es_administrador:
+        crear_boton(botones_citas, text='Generar cita', command=lambda: abrir_formulario_cita(ventana, conexion), estilo="principal", width=20).pack(side="right", padx=5)
+
+        crear_boton(botones_citas, text='Actualizar cita', command=lambda: abrir_consulta_citas(ventana, conexion, permitir_actualizacion=True), estilo="principal", width=20).pack(side="right", padx=5)

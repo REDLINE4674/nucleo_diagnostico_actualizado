@@ -2,16 +2,10 @@ import tkinter as tk
 from tkinter import messagebox
 import psycopg2
 
-from conexion import conectar, consulta_usuarios
-
-
-def obtener_nombre_perfil(rol):
-    perfiles = {
-        "1": "Administrador",
-        "2": "Empleado",
-        "3": "Doctor"
-    }
-    return perfiles.get(str(rol), "Rol no definido")
+from operaciones_sql.conexion import conectar
+from operaciones_sql.consultas import consulta_usuarios
+from utilidades.roles import obtener_nombre_perfil
+from utilidades.diseno import COLORES, FUENTES, crear_boton, crear_etiqueta
 
 
 def mostrar_login(ventana, al_conectar):
@@ -19,11 +13,11 @@ def mostrar_login(ventana, al_conectar):
     ventana.title("Inicio de sesión")
     ventana.geometry("900x500")
     ventana.resizable(False, False)
-    ventana.configure(bg="#F0F2F5")
+    ventana.configure(bg=COLORES["fondo"])
 
     login = tk.Frame(
         ventana,
-        bg="white",
+        bg=COLORES["blanco"],
         relief="solid",
         borderwidth=1
     )
@@ -38,32 +32,20 @@ def mostrar_login(ventana, al_conectar):
 
     encabezado = tk.Frame(
         login,
-        bg="#1F4E79",
+        bg=COLORES["azul"],
         height=100
     )
 
     encabezado.pack(fill="x")
     encabezado.pack_propagate(False)
 
-    tk.Label(
-        encabezado,
-        text="NÚCLEO",
-        font=("Arial", 22, "bold"),
-        fg="white",
-        bg="#1F4E79"
-    ).pack(pady=(20, 3))
+    crear_etiqueta(encabezado, text='NÚCLEO', estilo="encabezado", font=FUENTES['marca']).pack(pady=(20, 3))
 
-    tk.Label(
-        encabezado,
-        text="Sistema de administración de datos",
-        font=("Arial", 9),
-        fg="#DCE8F5",
-        bg="#1F4E79"
-    ).pack()
+    crear_etiqueta(encabezado, text='Sistema de administración de datos', estilo="sobre_azul", font=FUENTES['compacta']).pack()
 
     formulario = tk.Frame(
         login,
-        bg="white"
+        bg=COLORES["blanco"]
     )
 
     formulario.pack(
@@ -73,26 +55,14 @@ def mostrar_login(ventana, al_conectar):
         pady=20
     )
 
-    tk.Label(
-        formulario,
-        text="Inicio de sesión",
-        font=("Arial", 16, "bold"),
-        bg="white",
-        fg="#333333"
-    ).pack(pady=(0, 20))
+    crear_etiqueta(formulario, text='Inicio de sesión', estilo="texto", font=FUENTES['titulo_16']).pack(pady=(0, 20))
 
     # Usuario
-    tk.Label(
-        formulario,
-        text="Usuario",
-        font=("Arial", 10, "bold"),
-        bg="white",
-        fg="#333333"
-    ).pack(anchor="w")
+    crear_etiqueta(formulario, text='Usuario', estilo="texto", font=FUENTES['normal_negrita']).pack(anchor="w")
 
     caja_usuario = tk.Entry(
         formulario,
-        font=("Arial", 11),
+        font=FUENTES["mediana"],
         relief="solid",
         borderwidth=1
     )
@@ -104,18 +74,12 @@ def mostrar_login(ventana, al_conectar):
     )
 
     # Contraseña
-    tk.Label(
-        formulario,
-        text="Contraseña",
-        font=("Arial", 10, "bold"),
-        bg="white",
-        fg="#333333"
-    ).pack(anchor="w")
+    crear_etiqueta(formulario, text='Contraseña', estilo="texto", font=FUENTES['normal_negrita']).pack(anchor="w")
 
     caja_password = tk.Entry(
         formulario,
         show="*",
-        font=("Arial", 11),
+        font=FUENTES["mediana"],
         relief="solid",
         borderwidth=1
     )
@@ -179,37 +143,14 @@ def mostrar_login(ventana, al_conectar):
 
     botones = tk.Frame(
         formulario,
-        bg="white"
+        bg=COLORES["blanco"]
     )
 
     botones.pack(fill="x")
 
-    tk.Button(
-        botones,
-        text="Cancelar",
-        command=cancelar,
-        width=12,
-        bg="#E0E4E8",
-        fg="#333333",
-        activebackground="#D0D5DA",
-        relief="flat",
-        font=("Arial", 10),
-        cursor="hand2"
-    ).pack(side="left", padx=(0, 5), ipady=5)
+    crear_boton(botones, text='Cancelar', command=cancelar, estilo="neutro", width=12, activebackground=COLORES["gris_presionado"]).pack(side="left", padx=(0, 5), ipady=5)
 
-    tk.Button(
-        botones,
-        text="Iniciar sesión",
-        command=iniciar_sesion,
-        width=15,
-        bg="#1F4E79",
-        fg="white",
-        activebackground="#163A5A",
-        activeforeground="white",
-        relief="flat",
-        font=("Arial", 10, "bold"),
-        cursor="hand2"
-    ).pack(side="right", ipady=5)
+    crear_boton(botones, text='Iniciar sesión', command=iniciar_sesion, estilo="principal", width=15, activebackground=COLORES["azul_presionado"], activeforeground=COLORES["blanco"]).pack(side="right", ipady=5)
 
     ventana.bind("<Return>", lambda event: iniciar_sesion())
     caja_usuario.focus_set()
