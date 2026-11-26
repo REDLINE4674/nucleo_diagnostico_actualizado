@@ -12,7 +12,7 @@ from secciones.registros import (
     mostrar_pagina_registros
 )
 from utilidades.roles import obtener_nombre_perfil
-from utilidades.diseno import COLORES, FUENTES, crear_boton, crear_etiqueta
+from utilidades.diseno import COLORES, FUENTES, crear_boton, crear_etiqueta, crear_marco
 
 
 def mostrar_menu(ventana, conexion, usuario, rol, al_cerrar_sesion):
@@ -59,7 +59,7 @@ def mostrar_menu(ventana, conexion, usuario, rol, al_cerrar_sesion):
             )
         return False
 
-    barra_superior = tk.Frame(ventana, bg=COLORES["azul"])
+    barra_superior = crear_marco(ventana, estilo="azul")
     barra_superior.pack(fill="x", padx=12, pady=(12, 0))
 
     crear_etiqueta(barra_superior, text=f'Bienvenido  {usuario}  ({perfil})', estilo="encabezado", font=FUENTES['titulo_pequeno']).pack(side="left", padx=15, pady=10)
@@ -73,18 +73,12 @@ def mostrar_menu(ventana, conexion, usuario, rol, al_cerrar_sesion):
 
     # CONTENEDOR PRINCIPAL
 
-    contenido = tk.Frame(ventana, bg=COLORES["fondo"])
+    contenido = crear_marco(ventana, estilo="fondo")
     contenido.pack(fill="both", expand=True)
 
 # MENU LATERAL
 
-    menu = tk.Frame(
-        contenido,
-        bg=COLORES["blanco"],
-        width=210,
-        relief="solid",
-        borderwidth=1
-    )
+    menu = crear_marco(contenido, estilo="tarjeta", width=210)
 
     menu.pack(
         side="left",
@@ -106,7 +100,7 @@ def mostrar_menu(ventana, conexion, usuario, rol, al_cerrar_sesion):
     canvas_menu = tk.Canvas(menu, bg=COLORES["blanco"], highlightthickness=0)
     scroll_menu = ttk.Scrollbar(menu, orient="vertical", command=canvas_menu.yview)
 
-    contenedor_botones = tk.Frame(canvas_menu, bg=COLORES["blanco"])
+    contenedor_botones = crear_marco(canvas_menu, estilo="superficie")
     ventana_menu = canvas_menu.create_window((0, 0), window=contenedor_botones, anchor="nw")
 
     canvas_menu.configure(yscrollcommand=scroll_menu.set)
@@ -127,12 +121,7 @@ def mostrar_menu(ventana, conexion, usuario, rol, al_cerrar_sesion):
 
     # PANEL DE CONTENIDO
 
-    panel = tk.Frame(
-        contenido,
-        bg=COLORES["blanco"],
-        relief="solid",
-        borderwidth=1
-    )
+    panel = crear_marco(contenido, estilo="tarjeta")
 
     panel.pack(
         side="right",

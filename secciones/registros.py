@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import messagebox
 
 from operaciones_sql.consultas import consultar_registros
 from operaciones_sql.consultas_medicas import (
@@ -8,7 +8,7 @@ from operaciones_sql.consultas_medicas import (
 )
 from secciones.formulario_registro import abrir_ventana_insertar
 from secciones.diagnosticos import abrir_ventana_consulta_medica
-from utilidades.diseno import COLORES, FUENTES, crear_boton, crear_etiqueta
+from utilidades.diseno import FUENTES, crear_boton, crear_etiqueta, crear_tabla_con_scroll, crear_marco, crear_encabezado_seccion
 
 
 def es_tabla_pacientes(nombre_tabla):
@@ -82,33 +82,18 @@ def mostrar_pagina_registros(
     panel, ventana, conexion, nombre, es_administrador, es_empleado,
     es_doctor, id_doctor_logueado, nombre_doctor_logueado
 ):
-    encabezado_tabla = tk.Frame(
+    encabezado_tabla, contador_registros = crear_encabezado_seccion(
         panel,
-        bg=COLORES["blanco"]
+        str(nombre).strip().capitalize(),
+        descripcion_seccion(nombre, es_doctor),
+        mostrar_contador=True
     )
-
-    encabezado_tabla.pack(
-        fill="x",
-        padx=20,
-        pady=15
-    )
-
-    informacion_seccion = tk.Frame(encabezado_tabla, bg=COLORES["blanco"])
-    informacion_seccion.pack(side="left")
-
-    titulo_tabla = crear_etiqueta(informacion_seccion, text=str(nombre).strip().capitalize(), estilo="titulo", font=FUENTES['titulo'])
-    titulo_tabla.pack(anchor="w")
-
-    crear_etiqueta(informacion_seccion, text=descripcion_seccion(nombre, es_doctor), estilo="suave", font=FUENTES['normal']).pack(anchor="w", pady=(3, 0))
-
-    contador_registros = crear_etiqueta(encabezado_tabla, text='Registros encontrados: 0', estilo="suave", font=FUENTES['normal_negrita'])
-    contador_registros.pack(side="right")
 
     vista_registros = {"tabla": None}
 
     def asegurar_treeview():
         if vista_registros["tabla"] is None:
-            contenedor_tabla = tk.Frame(panel, bg=COLORES["blanco"])
+            contenedor_tabla = crear_marco(panel, estilo="superficie")
             contenedor_tabla.pack(
                 fill="both",
                 expand=True,
@@ -116,30 +101,7 @@ def mostrar_pagina_registros(
                 pady=10
             )
 
-            tabla_visual = ttk.Treeview(
-                contenedor_tabla,
-                show="headings"
-            )
-            scroll_vertical = ttk.Scrollbar(
-                contenedor_tabla,
-                orient="vertical",
-                command=tabla_visual.yview
-            )
-            scroll_horizontal = ttk.Scrollbar(
-                contenedor_tabla,
-                orient="horizontal",
-                command=tabla_visual.xview
-            )
-
-            tabla_visual.configure(
-                yscrollcommand=scroll_vertical.set,
-                xscrollcommand=scroll_horizontal.set
-            )
-            tabla_visual.grid(row=0, column=0, sticky="nsew")
-            scroll_vertical.grid(row=0, column=1, sticky="ns")
-            scroll_horizontal.grid(row=1, column=0, sticky="ew")
-            contenedor_tabla.grid_rowconfigure(0, weight=1)
-            contenedor_tabla.grid_columnconfigure(0, weight=1)
+            tabla_visual = crear_tabla_con_scroll(contenedor_tabla)
             vista_registros["tabla"] = tabla_visual
 
         return vista_registros["tabla"]
@@ -216,10 +178,7 @@ def mostrar_pagina_registros(
 
     # BOTONES INFERIORES
 
-    botones = tk.Frame(
-        panel,
-        bg=COLORES["blanco"]
-    )
+    botones = crear_marco(panel, estilo="superficie")
 
     botones.pack(
         fill="x",

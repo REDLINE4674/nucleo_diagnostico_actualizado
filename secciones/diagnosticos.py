@@ -9,7 +9,7 @@ from operaciones_sql.consultas_medicas import (
     obtener_pacientes_doctor
 )
 from utilidades.recetas import generar_pdf_receta
-from utilidades.diseno import COLORES, FUENTES, crear_boton, crear_etiqueta
+from utilidades.diseno import COLORES, FUENTES, crear_boton, crear_etiqueta, crear_marco, crear_entrada, crear_combobox
 
 
 def abrir_ventana_consulta_medica(
@@ -42,42 +42,36 @@ def abrir_ventana_consulta_medica(
     modal.grab_set()
 
     # Encabezado
-    encabezado = tk.Frame(modal, bg=COLORES["azul"], height=75)
+    encabezado = crear_marco(modal, estilo="azul", height=75)
     encabezado.pack(fill="x")
     encabezado.pack_propagate(False)
 
     crear_etiqueta(encabezado, text='CONSULTA MÉDICA E HISTORIAL CLÍNICO', estilo="encabezado", font=FUENTES['titulo_17']).pack(anchor="w", padx=20, pady=(14, 2))
 
-    crear_etiqueta(encabezado, text=f'Médico tratante: {nombre_doctor}', estilo="sobre_azul", font=FUENTES['normal']).pack(anchor="w", padx=20)
+    crear_etiqueta(encabezado, text=f'Médico tratante: {nombre_doctor}', estilo="sobre_azul").pack(anchor="w", padx=20)
 
-    cuerpo = tk.Frame(modal, bg=COLORES["fondo"])
+    cuerpo = crear_marco(modal, estilo="fondo")
     cuerpo.pack(fill="both", expand=True, padx=15, pady=12)
 
     # Selección de paciente
-    marco_paciente = tk.Frame(cuerpo, bg=COLORES["blanco"], relief="solid", borderwidth=1)
+    marco_paciente = crear_marco(cuerpo, estilo="tarjeta")
     marco_paciente.pack(fill="x", pady=(0, 10))
 
-    fila_pac = tk.Frame(marco_paciente, bg=COLORES["blanco"])
+    fila_pac = crear_marco(marco_paciente, estilo="superficie")
     fila_pac.pack(fill="x", padx=15, pady=10)
 
     crear_etiqueta(fila_pac, text='Paciente con cita:', estilo="texto", font=FUENTES['normal_negrita']).pack(side="left", padx=(0, 10))
 
-    combo_paciente = ttk.Combobox(
-        fila_pac,
-        state="readonly",
-        font=FUENTES["normal"],
-        width=40,
-        values=[p[1] for p in lista_pacientes]
-    )
+    combo_paciente = crear_combobox(fila_pac, state='readonly', width=40, values=[p[1] for p in lista_pacientes])
     combo_paciente.pack(side="left", fill="x", expand=True)
 
     # Cuadro de texto de Diagnóstico (Historial del paciente)
-    marco_diag = tk.Frame(cuerpo, bg=COLORES["blanco"], relief="solid", borderwidth=1)
+    marco_diag = crear_marco(cuerpo, estilo="tarjeta")
     marco_diag.pack(fill="both", expand=True, pady=(0, 10))
 
     crear_etiqueta(marco_diag, text='Diagnóstico e Historial Clínico del Paciente', estilo="titulo", font=FUENTES['mediana_negrita']).pack(anchor="w", padx=15, pady=(10, 5))
 
-    contenedor_texto = tk.Frame(marco_diag, bg=COLORES["blanco"])
+    contenedor_texto = crear_marco(marco_diag, estilo="superficie")
     contenedor_texto.pack(fill="both", expand=True, padx=15, pady=(0, 10))
 
     texto_diagnostico = tk.Text(
@@ -98,12 +92,12 @@ def abrir_ventana_consulta_medica(
     scroll_texto.pack(side="right", fill="y")
 
     # Sección de Medicamento y Tratamiento
-    marco_med = tk.Frame(cuerpo, bg=COLORES["blanco"], relief="solid", borderwidth=1)
+    marco_med = crear_marco(cuerpo, estilo="tarjeta")
     marco_med.pack(fill="x", pady=(0, 10))
 
     crear_etiqueta(marco_med, text='Prescripción de Medicamento', estilo="titulo", font=FUENTES['mediana_negrita']).pack(anchor="w", padx=15, pady=(10, 5))
 
-    grid_med = tk.Frame(marco_med, bg=COLORES["blanco"])
+    grid_med = crear_marco(marco_med, estilo="superficie")
     grid_med.pack(fill="x", padx=15, pady=(0, 10))
     grid_med.grid_columnconfigure(0, weight=2)
     grid_med.grid_columnconfigure(1, weight=1)
@@ -115,31 +109,16 @@ def abrir_ventana_consulta_medica(
 
     crear_etiqueta(grid_med, text='Horario de suministro', estilo="texto", font=FUENTES['compacta_negrita']).grid(row=0, column=2, sticky="w", padx=4)
 
-    combo_medicamento = ttk.Combobox(
-        grid_med,
-        state="readonly" if catalogo_medicamentos else "normal",
-        font=FUENTES["normal"],
-        values=[m[1] for m in catalogo_medicamentos]
-    )
+    combo_medicamento = crear_combobox(grid_med, state='readonly' if catalogo_medicamentos else 'normal', values=[m[1] for m in catalogo_medicamentos])
     combo_medicamento.grid(row=1, column=0, sticky="ew", padx=4, pady=4, ipady=3)
     if catalogo_medicamentos:
         combo_medicamento.current(0)
 
-    entrada_dias = tk.Entry(
-        grid_med,
-        font=FUENTES["normal"],
-        relief="solid",
-        borderwidth=1
-    )
+    entrada_dias = crear_entrada(grid_med)
     entrada_dias.grid(row=1, column=1, sticky="ew", padx=4, pady=4, ipady=4)
     entrada_dias.insert(0, "7 días")
 
-    entrada_horario = tk.Entry(
-        grid_med,
-        font=FUENTES["normal"],
-        relief="solid",
-        borderwidth=1
-    )
+    entrada_horario = crear_entrada(grid_med)
     entrada_horario.grid(row=1, column=2, sticky="ew", padx=4, pady=4, ipady=4)
     entrada_horario.insert(0, "Cada 8 horas")
 
@@ -203,7 +182,7 @@ def abrir_ventana_consulta_medica(
     crear_boton(grid_med, text='Agregar medicamento al diagnóstico', command=agregar_tratamiento_al_diagnostico, estilo="secundario", font=('Arial', 9, 'bold')).grid(row=2, column=0, columnspan=3, sticky="e", padx=4, pady=(4, 0))
 
     # Botones inferiores
-    botones = tk.Frame(cuerpo, bg=COLORES["fondo"])
+    botones = crear_marco(cuerpo, estilo="fondo")
     botones.pack(fill="x", pady=(2, 0))
 
     def accion_generar_receta():

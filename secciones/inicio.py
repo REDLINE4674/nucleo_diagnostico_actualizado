@@ -1,11 +1,11 @@
 from pathlib import Path
 import tkinter as tk
 from PIL import Image, ImageTk
-from utilidades.diseno import COLORES, FUENTES, crear_etiqueta
+from utilidades.diseno import COLORES, FUENTES, crear_etiqueta, crear_marco
 
 
 def mostrar_inicio(panel, usuario, perfil):
-    inicio = tk.Frame(panel, bg=COLORES["blanco"])
+    inicio = crear_marco(panel, estilo="superficie")
     inicio.pack(fill="both", expand=True)
 
     try:
@@ -21,4 +21,4 @@ def mostrar_inicio(panel, usuario, perfil):
     crear_etiqueta(inicio, text=f'Usuario: {usuario}', estilo="texto", font=('Arial', 21, 'bold')).pack(pady=10)
     crear_etiqueta(inicio, text=f'Perfil: {perfil}', estilo="titulo", font=FUENTES['mediana_negrita']).pack(pady=(0, 10))
     crear_etiqueta(inicio, text='Bienvenido al sistema de administración de datos.', estilo="suave", font=FUENTES['mediana']).pack(pady=15)
-    crear_etiqueta(inicio, text='Selecciona una opción del menú lateral para comenzar.', estilo="tenue", font=FUENTES['normal']).pack(pady=5)
+    crear_etiqueta(inicio, text='Selecciona una opción del menú lateral para comenzar.', estilo="tenue").pack(pady=5)

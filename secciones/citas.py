@@ -13,7 +13,7 @@ from operaciones_sql.citas import (
     obtener_cita,
     actualizar_cita
 )
-from utilidades.diseno import COLORES, FUENTES, crear_boton, crear_etiqueta
+from utilidades.diseno import COLORES, FUENTES, crear_boton, crear_etiqueta, crear_tabla_con_scroll, crear_marco, crear_entrada, crear_combobox, crear_encabezado_seccion
 
 
 def abrir_formulario_cita(
@@ -43,11 +43,7 @@ def abrir_formulario_cita(
 
     # Encabezado
 
-    encabezado = tk.Frame(
-        nueva,
-        bg=COLORES["azul"],
-        height=75
-    )
+    encabezado = crear_marco(nueva, estilo="azul", height=75)
 
     encabezado.pack(fill="x")
     encabezado.pack_propagate(False)
@@ -55,7 +51,7 @@ def abrir_formulario_cita(
     titulo_encabezado = crear_etiqueta(encabezado, text='ACTUALIZAR CITA' if id_cita is not None else 'GENERAR CITA', estilo="encabezado", font=FUENTES['titulo_19'])
     titulo_encabezado.pack(anchor="w", padx=25, pady=(15, 2))
 
-    crear_etiqueta(encabezado, text='Modifica el médico, la fecha o el horario.' if id_cita is not None else 'Programa una cita médica.', estilo="sobre_azul", font=FUENTES['normal']).pack(anchor="w", padx=25)
+    crear_etiqueta(encabezado, text='Modifica el médico, la fecha o el horario.' if id_cita is not None else 'Programa una cita médica.', estilo="sobre_azul").pack(anchor="w", padx=25)
 
     def regresar_menu():
         nueva.destroy()
@@ -68,10 +64,7 @@ def abrir_formulario_cita(
 
     # Contenedor principal
 
-    principal = tk.Frame(
-        nueva,
-        bg=COLORES["fondo"]
-    )
+    principal = crear_marco(nueva, estilo="fondo")
 
     principal.pack(
         fill="both",
@@ -82,12 +75,7 @@ def abrir_formulario_cita(
 
     # Formulario
 
-    formulario = tk.Frame(
-        principal,
-        bg=COLORES["blanco"],
-        relief="solid",
-        borderwidth=1
-    )
+    formulario = crear_marco(principal, estilo="tarjeta")
 
     formulario.pack(
         fill="x",
@@ -96,10 +84,7 @@ def abrir_formulario_cita(
 
     crear_etiqueta(formulario, text='Datos de la cita', estilo="titulo", font=FUENTES['titulo_14']).pack(anchor="w", padx=20, pady=(15, 10))
 
-    campos = tk.Frame(
-        formulario,
-        bg=COLORES["blanco"]
-    )
+    campos = crear_marco(formulario, estilo="superficie")
 
     campos.pack(
         fill="x",
@@ -114,11 +99,7 @@ def abrir_formulario_cita(
 
     crear_etiqueta(campos, text='Paciente', estilo="texto", font=FUENTES['normal_negrita']).grid(row=0, column=0, sticky="w", padx=5, pady=5)
 
-    combo_paciente = ttk.Combobox(
-        campos,
-        state="readonly",
-        font=FUENTES["normal"]
-    )
+    combo_paciente = crear_combobox(campos, state='readonly')
 
     combo_paciente.grid(
         row=1,
@@ -132,11 +113,7 @@ def abrir_formulario_cita(
 
     crear_etiqueta(campos, text='Médico', estilo="texto", font=FUENTES['normal_negrita']).grid(row=0, column=1, sticky="w", padx=5, pady=5)
 
-    combo_medico = ttk.Combobox(
-        campos,
-        state="readonly",
-        font=FUENTES["normal"]
-    )
+    combo_medico = crear_combobox(campos, state='readonly')
 
     combo_medico.grid(
         row=1,
@@ -150,7 +127,7 @@ def abrir_formulario_cita(
 
     crear_etiqueta(campos, text='Fecha (AAAA-MM-DD)', estilo="texto", font=FUENTES['normal_negrita']).grid(row=2, column=0, sticky="w", padx=5, pady=5)
 
-    marco_fecha = tk.Frame(campos, bg=COLORES["blanco"])
+    marco_fecha = crear_marco(campos, estilo="superficie")
     marco_fecha.grid(
         row=3,
         column=0,
@@ -160,12 +137,7 @@ def abrir_formulario_cita(
     )
     marco_fecha.grid_columnconfigure(0, weight=1)
 
-    entrada_fecha = tk.Entry(
-        marco_fecha,
-        font=FUENTES["normal"],
-        relief="solid",
-        borderwidth=1
-    )
+    entrada_fecha = crear_entrada(marco_fecha)
     entrada_fecha.grid(row=0, column=0, sticky="ew", ipady=6)
 
     entrada_fecha.insert(0, date.today().isoformat())
@@ -174,11 +146,7 @@ def abrir_formulario_cita(
 
     crear_etiqueta(campos, text='Horario disponible', estilo="texto", font=FUENTES['normal_negrita']).grid(row=2, column=1, sticky="w", padx=5, pady=5)
 
-    combo_horario = ttk.Combobox(
-        campos,
-        state="readonly",
-        font=FUENTES["normal"]
-    )
+    combo_horario = crear_combobox(campos, state='readonly')
 
     combo_horario.grid(
         row=3,
@@ -499,10 +467,7 @@ def abrir_formulario_cita(
                 parent=nueva
             )
 
-    botones_formulario = tk.Frame(
-        formulario,
-        bg=COLORES["blanco"]
-    )
+    botones_formulario = crear_marco(formulario, estilo="superficie")
 
     botones_formulario.pack(
         fill="x",
@@ -662,11 +627,13 @@ def abrir_consulta_citas(
 
     crear_etiqueta(consulta, text='CITAS REGISTRADAS', estilo="encabezado", font=FUENTES['titulo_16'], pady=18).pack(fill="x")
 
-    marco = tk.Frame(consulta, bg=COLORES["blanco"])
+    marco = crear_marco(consulta, estilo="superficie")
     marco.pack(fill="both", expand=True, padx=15, pady=15)
 
     columnas = ("id", "paciente", "medico", "fecha", "hora")
-    tabla = ttk.Treeview(marco, columns=columnas, show="headings")
+    tabla = crear_tabla_con_scroll(
+        marco, columnas=columnas, horizontal=False, distribucion="pack"
+    )
 
     for columna, etiqueta, ancho in (
         ("id", "ID", 60),
@@ -682,17 +649,12 @@ def abrir_consulta_citas(
             anchor="center" if columna in ("id", "fecha", "hora") else "w"
         )
 
-    scroll = ttk.Scrollbar(marco, orient="vertical", command=tabla.yview)
-    tabla.configure(yscrollcommand=scroll.set)
-    tabla.pack(side="left", fill="both", expand=True)
-    scroll.pack(side="right", fill="y")
-
     def cargar_citas():
         if permitir_actualizacion:
             boton_actualizar.configure(state="disabled")
         _cargar_citas_en_tabla(tabla, conexion, consulta, id_doctor=id_doctor)
 
-    botones = tk.Frame(consulta, bg=COLORES["fondo"])
+    botones = crear_marco(consulta, estilo="fondo")
     botones.pack(pady=(0, 12))
 
     crear_boton(botones, text='Actualizar lista', command=cargar_citas, estilo="principal").pack(side="left", padx=5)
@@ -748,14 +710,12 @@ def mostrar_consulta_citas(
     for widget in contenedor.winfo_children():
         widget.destroy()
 
-    tabla_contenedor = tk.Frame(contenedor, bg=COLORES["blanco"])
+    tabla_contenedor = crear_marco(contenedor, estilo="superficie")
     tabla_contenedor.pack(fill="both", expand=True)
 
     columnas = ("id", "paciente", "medico", "fecha", "hora")
-    tabla = ttk.Treeview(
-        tabla_contenedor,
-        columns=columnas,
-        show="headings"
+    tabla = crear_tabla_con_scroll(
+        tabla_contenedor, columnas=columnas
     )
 
     for columna, etiqueta, ancho in (
@@ -772,26 +732,6 @@ def mostrar_consulta_citas(
             anchor="center" if columna in ("id", "fecha", "hora") else "w"
         )
 
-    scroll_vertical = ttk.Scrollbar(
-        tabla_contenedor,
-        orient="vertical",
-        command=tabla.yview
-    )
-    scroll_horizontal = ttk.Scrollbar(
-        tabla_contenedor,
-        orient="horizontal",
-        command=tabla.xview
-    )
-    tabla.configure(
-        yscrollcommand=scroll_vertical.set,
-        xscrollcommand=scroll_horizontal.set
-    )
-    tabla.grid(row=0, column=0, sticky="nsew")
-    scroll_vertical.grid(row=0, column=1, sticky="ns")
-    scroll_horizontal.grid(row=1, column=0, sticky="ew")
-    tabla_contenedor.grid_rowconfigure(0, weight=1)
-    tabla_contenedor.grid_columnconfigure(0, weight=1)
-
     _cargar_citas_en_tabla(
         tabla,
         conexion,
@@ -806,28 +746,22 @@ def mostrar_pagina_citas(
     panel, ventana, conexion, es_doctor, es_empleado,
     es_administrador, id_doctor_logueado
 ):
-    encabezado_citas = tk.Frame(panel, bg=COLORES["blanco"])
-    encabezado_citas.pack(fill="x", padx=20, pady=15)
-
-    informacion_citas = tk.Frame(encabezado_citas, bg=COLORES["blanco"])
-    informacion_citas.pack(side="left")
-
-    crear_etiqueta(informacion_citas, text='Citas', estilo="titulo", font=FUENTES['titulo']).pack(anchor="w")
-
     subtitulo_citas = (
-        "Consulta tus citas médicas agendadas."
+        "Consulta tus citas m\u00e9dicas agendadas."
         if es_doctor
-        else "Genera, consulta y actualiza citas médicas."
+        else "Genera, consulta y actualiza citas m\u00e9dicas."
     )
-    crear_etiqueta(informacion_citas, text=subtitulo_citas, estilo="suave", font=FUENTES['normal']).pack(anchor="w", pady=(3, 0))
+    _, contador_citas = crear_encabezado_seccion(
+        panel,
+        "Citas",
+        subtitulo_citas,
+        mostrar_contador=True
+    )
 
-    contador_citas = crear_etiqueta(encabezado_citas, text='Registros encontrados: 0', estilo="suave", font=FUENTES['normal_negrita'])
-    contador_citas.pack(side="right")
-
-    botones_citas = tk.Frame(panel, bg=COLORES["blanco"])
+    botones_citas = crear_marco(panel, estilo="superficie")
     botones_citas.pack(fill="x", padx=20, pady=15)
 
-    area_resultados_citas = tk.Frame(panel, bg=COLORES["blanco"])
+    area_resultados_citas = crear_marco(panel, estilo="superficie")
     area_resultados_citas.pack(
         fill="both",
         expand=True,

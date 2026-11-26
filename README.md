@@ -136,7 +136,7 @@ operaciones_sql/              Acceso a PostgreSQL y operaciones de datos
   consultas_medicas.py        Historial, pacientes y medicamentos
   insertar.py                 Insercion de registros
 utilidades/                   Funciones compartidas
-  diseno.py                   Colores, fuentes y constructores de widgets
+  diseno.py                   Colores, fuentes, campos y tablas con scroll
   roles.py                    Etiquetas de perfil
   recetas.py                  Generacion de recetas PDF
 database/                     Scripts SQL de actualizacion y creacion

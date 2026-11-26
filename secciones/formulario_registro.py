@@ -6,7 +6,7 @@ from operaciones_sql.consultas import (
     obtener_personal_por_rol
 )
 from operaciones_sql.insertar import insertar_registro
-from utilidades.diseno import COLORES, FUENTES, crear_boton, crear_etiqueta
+from utilidades.diseno import COLORES, FUENTES, crear_boton, crear_etiqueta, crear_marco, crear_entrada, crear_combobox
 
 
 def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
@@ -80,25 +80,18 @@ def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
 
         # ENCABEZADO
 
-        encabezado = tk.Frame(
-            nueva,
-            bg=COLORES["azul"],
-            height=85
-        )
+        encabezado = crear_marco(nueva, estilo="azul", height=85)
 
         encabezado.pack(fill="x")
         encabezado.pack_propagate(False)
 
-        crear_etiqueta(encabezado, text='Nuevo registro', estilo="encabezado", font=FUENTES['titulo']).pack(anchor="w", padx=20, pady=(15, 2))
+        crear_etiqueta(encabezado, text='Nuevo registro', estilo="encabezado").pack(anchor="w", padx=20, pady=(15, 2))
 
-        crear_etiqueta(encabezado, text=f'Tabla: {nombre_tabla.capitalize()}', estilo="sobre_azul", font=FUENTES['normal']).pack(anchor="w", padx=20)
+        crear_etiqueta(encabezado, text=f'Tabla: {nombre_tabla.capitalize()}', estilo="sobre_azul").pack(anchor="w", padx=20)
 
         # CONTENEDOR DEL FORMULARIO
 
-        contenedor = tk.Frame(
-            nueva,
-            bg=COLORES["fondo"]
-        )
+        contenedor = crear_marco(nueva, estilo="fondo")
 
         contenedor.pack(
             fill="both",
@@ -119,10 +112,7 @@ def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
             command=canvas.yview
         )
 
-        formulario = tk.Frame(
-            canvas,
-            bg=COLORES["blanco"]
-        )
+        formulario = crear_marco(canvas, estilo="superficie")
 
         ventana_formulario = canvas.create_window(
             (0, 0),
@@ -193,10 +183,7 @@ def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
             if es_columna_id_usuario:
                 selector_id_creado = True
 
-            campo = tk.Frame(
-                formulario,
-                bg=COLORES["blanco"]
-            )
+            campo = crear_marco(formulario, estilo="superficie")
 
             campo.pack(
                 fill="x",
@@ -211,57 +198,28 @@ def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
 
             if nombre_normalizado == "sexo":
 
-                entrada = ttk.Combobox(
-                    campo,
-                    values=["F", "M"],
-                    state="readonly",
-                    font=FUENTES["normal"],
-                    style="Formulario.TCombobox"
-                )
+                entrada = crear_combobox(campo, values=['F', 'M'], state='readonly', style='Formulario.TCombobox')
                 entrada.set("")
 
             elif nombre_normalizado == "turno":
 
-                entrada = ttk.Combobox(
-                    campo,
-                    values=["M", "V"],
-                    state="readonly",
-                    font=FUENTES["normal"],
-                    style="Formulario.TCombobox"
-                )
+                entrada = crear_combobox(campo, values=['M', 'V'], state='readonly', style='Formulario.TCombobox')
                 entrada.set("")
 
             elif es_tabla_usuarios and nombre_normalizado == "rol":
 
-                entrada = ttk.Combobox(
-                    campo,
-                    values=["admin", "empleado", "doctor"],
-                    state="readonly",
-                    font=FUENTES["normal"],
-                    style="Formulario.TCombobox"
-                )
+                entrada = crear_combobox(campo, values=['admin', 'empleado', 'doctor'], state='readonly', style='Formulario.TCombobox')
                 entrada.set("empleado")
                 entrada_rol = entrada
 
             elif es_columna_id_usuario:
 
-                entrada = ttk.Combobox(
-                    campo,
-                    values=[],
-                    state="readonly",
-                    font=FUENTES["normal"],
-                    style="Formulario.TCombobox"
-                )
+                entrada = crear_combobox(campo, values=[], state='readonly', style='Formulario.TCombobox')
                 entrada_id = entrada
 
             else:
 
-                entrada = tk.Entry(
-                    campo,
-                    font=FUENTES["normal"],
-                    relief="solid",
-                    borderwidth=1
-                )
+                entrada = crear_entrada(campo)
 
             entrada.grid(
                 row=0,
@@ -399,10 +357,7 @@ def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
 
         # Botones
 
-        botones = tk.Frame(
-            nueva,
-            bg=COLORES["fondo"]
-        )
+        botones = crear_marco(nueva, estilo="fondo")
 
         botones.pack(
             fill="x",

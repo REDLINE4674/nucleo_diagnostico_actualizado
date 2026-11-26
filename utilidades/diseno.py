@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 
 
 COLORES = {
@@ -104,3 +105,102 @@ def crear_boton(parent, *, estilo="principal", **opciones):
     configuracion = _ESTILOS_BOTON[estilo].copy()
     configuracion.update(opciones)
     return tk.Button(parent, **configuracion)
+
+
+_ESTILOS_MARCO = {
+    "fondo": {"bg": COLORES["fondo"]},
+    "superficie": {"bg": COLORES["blanco"]},
+    "azul": {"bg": COLORES["azul"]},
+    "tarjeta": {
+        "bg": COLORES["blanco"],
+        "relief": "solid",
+        "borderwidth": 1,
+    },
+}
+
+
+def crear_marco(parent, *, estilo="superficie", **opciones):
+    """Crea un marco con uno de los fondos y bordes compartidos."""
+    configuracion = _ESTILOS_MARCO[estilo].copy()
+    configuracion.update(opciones)
+    return tk.Frame(parent, **configuracion)
+
+
+def crear_entrada(parent, **opciones):
+    """Crea una entrada de texto con la tipografia y el borde comunes."""
+    configuracion = {
+        "font": FUENTES["normal"],
+        "relief": "solid",
+        "borderwidth": 1,
+    }
+    configuracion.update(opciones)
+    return tk.Entry(parent, **configuracion)
+
+
+def crear_combobox(parent, **opciones):
+    """Crea un selector con la tipografia compartida."""
+    configuracion = {"font": FUENTES["normal"]}
+    configuracion.update(opciones)
+    return ttk.Combobox(parent, **configuracion)
+
+
+
+def crear_tabla_con_scroll(
+    parent, *, columnas=(), horizontal=True, distribucion="grid", **opciones
+):
+    """Crea una tabla con scroll vertical y, si se solicita, horizontal."""
+    opciones.setdefault("show", "headings")
+    tabla = ttk.Treeview(parent, columns=columnas, **opciones)
+    scroll_vertical = ttk.Scrollbar(
+        parent,
+        orient="vertical",
+        command=tabla.yview
+    )
+    tabla.configure(yscrollcommand=scroll_vertical.set)
+
+    if distribucion == "pack":
+        tabla.pack(side="left", fill="both", expand=True)
+        scroll_vertical.pack(side="right", fill="y")
+        return tabla
+
+    tabla.grid(row=0, column=0, sticky="nsew")
+    scroll_vertical.grid(row=0, column=1, sticky="ns")
+    if horizontal:
+        scroll_horizontal = ttk.Scrollbar(
+            parent,
+            orient="horizontal",
+            command=tabla.xview
+        )
+        tabla.configure(xscrollcommand=scroll_horizontal.set)
+        scroll_horizontal.grid(row=1, column=0, sticky="ew")
+    parent.grid_rowconfigure(0, weight=1)
+    parent.grid_columnconfigure(0, weight=1)
+    return tabla
+
+
+
+def crear_encabezado_seccion(
+    parent, titulo, subtitulo, *, mostrar_contador=False
+):
+    """Crea el encabezado comun de una pagina y devuelve su contador opcional."""
+    encabezado = crear_marco(parent, estilo="superficie")
+    encabezado.pack(fill="x", padx=20, pady=15)
+    informacion = crear_marco(encabezado, estilo="superficie")
+    informacion.pack(side="left")
+    crear_etiqueta(informacion, text=titulo, estilo="titulo").pack(anchor="w")
+    crear_etiqueta(
+        informacion,
+        text=subtitulo,
+        estilo="suave"
+    ).pack(anchor="w", pady=(3, 0))
+
+    contador = None
+    if mostrar_contador:
+        contador = crear_etiqueta(
+            encabezado,
+            text="Registros encontrados: 0",
+            estilo="suave",
+            font=FUENTES["normal_negrita"]
+        )
+        contador.pack(side="right")
+    return encabezado, contador
