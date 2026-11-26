@@ -58,10 +58,9 @@ def texto_boton_insertar(nombre_tabla):
     return etiquetas.get(nombre_normalizado, "Nuevo registro")
 
 
-def mostrar_datos(conexion, tabla_visual, titulo, nombre_tabla):
+def mostrar_datos(conexion, tabla_visual, nombre_tabla):
     try:
         columnas, registros = consultar_registros(conexion, nombre_tabla)
-        titulo.config(text=nombre_tabla.capitalize())
         tabla_visual.delete(*tabla_visual.get_children())
         tabla_visual["columns"] = columnas
         for columna in columnas:
@@ -160,7 +159,6 @@ def mostrar_pagina_registros(
             cantidad = mostrar_datos(
                 conexion,
                 tabla_visual,
-                titulo_tabla,
                 nombre_actual
             )
             contador_registros.config(
