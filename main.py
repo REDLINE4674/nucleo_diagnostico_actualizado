@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 from secciones.login import mostrar_login
 from interfaz.menu import mostrar_menu
 
@@ -24,7 +25,7 @@ def main():
             conexion_actual.close()
         ventana.destroy()
 
-    def cerrar_sesion():
+    def cerrar_sesion(usuario):
         nonlocal conexion_actual
 
         if conexion_actual:
@@ -33,6 +34,12 @@ def main():
 
         for widget in ventana.winfo_children():
             widget.destroy()
+
+        messagebox.showinfo(
+            "Sesi\u00f3n cerrada",
+            f"Se cerr\u00f3 la sesi\u00f3n de {usuario}.",
+            parent=ventana
+        )
 
         mostrar_login(
             ventana,

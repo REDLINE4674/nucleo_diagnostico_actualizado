@@ -67,7 +67,7 @@ def mostrar_menu(ventana, conexion, usuario, rol, al_cerrar_sesion):
     crear_boton(
         barra_superior,
         text="Cerrar sesi\u00f3n",
-        command=al_cerrar_sesion,
+        command=lambda: al_cerrar_sesion(usuario),
         estilo="blanco"
     ).pack(side="right", padx=10, pady=5)
 
